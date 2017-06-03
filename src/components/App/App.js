@@ -1,9 +1,9 @@
 import React, { PropTypes } from 'react'
+import World from '../World'
 
 const App = (props) => (
-  <div>
-    <div>Hello World</div>
-    {props.children}
+  <div className="App">
+    <World/>
   </div>
 )
 
