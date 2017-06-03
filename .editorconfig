@@ -1,0 +1,18 @@
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+insert_final_newline = true
+indent_size = 2
+indent_style = space
+charset = utf-8
+
+[*.{js,jsx,html,css,less,scss}]
+# indent_size = 4
+
+# shell scripts *require* mixed tab/spaces support
+[*.sh]
+indent_style = none
+indent_size = 0

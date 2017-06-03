@@ -1,0 +1,265 @@
+
+/*------------------------------
+
+Zorroa core (shared) css mixins
+
+Only put definitions & mixins here, not selectors/globals
+(because selectors will get duplicated everwhere this file is imported)
+
+------------------------------*/
+
+
+@mixin hide { display:none!important; }
+
+@mixin animate { transition:0.25s; }
+
+/*
+Define colors from the Zorroa style guide:
+https://app.zeplin.io/project.html#pid=57c999e39adaa8120388fa9a&styleguide
+*/
+
+$zorroa-greyish-brown  : #4d4948;
+$zorroa-black          : #1f1a17;
+$zorroa-white          : #e1e1e1;
+$zorroa-avocado-green  : #82a626;
+$zorroa-sickly-green   : #73b61c;
+$zorroa-faded-red      : #ce2d3f;
+$zorroa-orangish       : #fc6c2c;
+$zorroa-water-blue     : #1875d1;
+$zorroa-darkish-purple : #a11e77;
+$zorroa-medium-pink    : #ee4688;
+$zorroa-warm-grey-60   : rgba(128, 128, 128, 0.6);
+$zorroa-slategray      : #787a77;
+$zorroa-light-green    : #b7df4d;
+$zorroa-golden-yellow  : #ead011;
+
+
+// A few extra useful colors Amber didn't specify
+
+$zorroa-darkgray   : #4a4a4a;
+$zorroa-gray       : #808080;
+$zorroa-whitegray  : #b3b3b3;
+$zorroa-lightgray  : #c3c3c3;
+$zorroa-darkwhite  : #d8d8d8;
+$zorroa-nearwhite  : #ededed;
+$zorroa-transparent: transparent;
+
+$zorroa-selected       : #D1E3F6;
+$zorroa-hover          : #C7E3A4;
+$zorroa-dropzone       : rgba(115, 182, 28, 0.75);
+
+/* shared metrics */
+
+$zorroa-Sidebar-width : 340px;
+
+
+/* Button classes */
+
+// @mixin zorroa-btn-bg($color,$hover) {
+//   background-color: $color;
+//   &:hover {
+//     color: white;
+//     background-color: $hover;
+//   }
+// }
+// @mixin zorroa-btn($color,$hover) {
+//   @extend .zorroa-btn;
+//   @include zorroa-btn-bg($color,$hover);
+//   &:disabled {
+//     color: white;
+//     background-color: $zorroa-lightgray;
+//   }
+// }
+
+@mixin zorroa-square-icon($size) {
+  @include flexOff;
+  @include flexRowCenter;
+  width: $size;
+  height: $size;
+}
+
+@mixin zorroa-square-btn($size) {
+  @include zorroa-square-icon($size);
+  cursor: pointer;
+}
+
+@mixin zorroa-lighten {
+  &:hover {
+    font-weight: 700;
+    background-color: rgba(255,255,255,0.2);
+  }
+}
+
+@mixin zorroa-square-btn-lighten($size) {
+  @include zorroa-square-btn($size);
+  @include zorroa-lighten;
+}
+
+@mixin zorroa-darken {
+  &:hover {
+    font-weight: 700;
+    background-color: rgba(0,0,0,0.2);
+  }
+}
+
+// squre button overlay -- background is transparent
+@mixin zorroa-square-btn-darken($size) {
+  @include zorroa-square-btn($size);
+  @include zorroa-darken;
+}
+
+// more general non-square button, opaque background, explicit hover color
+@mixin zorroa-btn($width, $height, $bgColor, $bgHover) {
+  @include flexOff;
+  @include flexRowCenter;
+  width: $width;
+  height: $height;
+  cursor: pointer;
+  border: none;
+  border-radius: 3px;
+  background-color: $bgColor;
+  &:hover {
+    background-color: $bgHover;
+  }
+}
+
+/* Text classes */
+
+@mixin nowrap { white-space: nowrap; }
+
+@mixin clampText {
+  @include nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+@mixin noSelect {
+  /* Prevent selection */
+  -webkit-user-select : none;
+  -moz-user-select    : none;
+  -ms-user-select     : none;
+  user-select         : none;
+
+  cursor: default;
+
+  /* Prevent dragging too */
+  -webkit-user-drag : none;
+  user-drag         : none;
+}
+
+/* Flexbox classes */
+
+
+@mixin flexRow {
+  display : -webkit-box  ;
+  display : -moz-box     ;
+  display : -ms-flexbox  ;
+  display : -webkit-flex ;
+  display : flex         ;
+
+  -webkit-flex-direction : row ;
+  -moz-flex-direction    : row ;
+  -ms-flex-direction     : row ;
+  flex-direction         : row ;
+}
+
+@mixin flexRowRev {
+  display : -webkit-box  ;
+  display : -moz-box     ;
+  display : -ms-flexbox  ;
+  display : -webkit-flex ;
+  display : flex         ;
+
+  -webkit-flex-direction : row-reverse ;
+  -moz-flex-direction    : row-reverse ;
+  -ms-flex-direction     : row-reverse ;
+  flex-direction         : row-reverse ;
+}
+
+@mixin flexCol {
+  display : -webkit-box  ;
+  display : -moz-box     ;
+  display : -ms-flexbox  ;
+  display : -webkit-flex ;
+  display : flex         ;
+
+  -webkit-flex-direction : column ;
+  -moz-flex-direction    : column ;
+  -ms-flex-direction     : column ;
+  flex-direction         : column ;
+}
+
+@mixin flexColRev {
+  display : -webkit-box  ;
+  display : -moz-box     ;
+  display : -ms-flexbox  ;
+  display : -webkit-flex ;
+  display : flex         ;
+
+  -webkit-flex-direction : column-reverse ;
+  -moz-flex-direction    : column-reverse ;
+  -ms-flex-direction     : column-reverse ;
+  flex-direction         : column-reverse ;
+}
+
+/* flexRowThenCol is a row when wide, then a column when narrow */
+
+@mixin flexRowThenCol($breakWidth) {
+  @include flexRow;
+  @media screen and (max-width: $breakWidth) { @include flexCol; }
+}
+
+@mixin flexRowThenColRev($breakWidth) {
+  @include flexRow;
+  @media screen and (max-width: $breakWidth) { @include flexColRev; }
+}
+
+@mixin flexWrap {
+    -webkit-flex-wrap: wrap;
+    -moz-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+}
+
+@mixin flexNoWrap {
+    -webkit-flex-wrap: no-wrap;
+    -moz-flex-wrap: no-wrap;
+    -ms-flex-wrap: no-wrap;
+    flex-wrap: no-wrap;
+}
+
+@mixin flexOn  { -webkit-box-flex : 1 1 auto ; -moz-box-flex : 1 1 auto; -webkit-flex : 1 1 auto ; -ms-flex : 1 1 auto; flex : 1 1 auto; }
+@mixin flexOff { -webkit-box-flex : 0 0 auto ; -moz-box-flex : 0 0 auto; -webkit-flex : 0 0 auto ; -ms-flex : 0 0 auto; flex : 0 0 auto; }
+
+@mixin flexShrinkOnly { -webkit-box-flex : 0 1 auto ; -moz-box-flex : 0 1 auto; -webkit-flex : 0 1 auto ; -ms-flex : 0 1 auto; flex : 0 1 auto; }
+
+@mixin flexJustifyStart  { -webkit-justify-content: flex-start ; -moz-justify-content: flex-start ; -ms-flex-pack: flex-start ; justify-content: flex-start ; }
+@mixin flexJustifyEnd    { -webkit-justify-content: flex-end   ; -moz-justify-content: flex-end   ; -ms-flex-pack: flex-end   ; justify-content: flex-end   ; }
+@mixin flexJustifyCenter { -webkit-justify-content: center     ; -moz-justify-content: center     ; -ms-flex-pack: center     ; justify-content: center     ; }
+@mixin flexJustifySpaceBetween { -webkit-justify-content: space-between ; -moz-justify-content: space-between ; -ms-flex-pack: space-between ; justify-content: space-between ; }
+
+@mixin flexAlignItemsCenter { -webkit-align-items: center     ; -moz-align-items: center     ; -ms-align-items: center     ; align-items: center     ; }
+@mixin flexAlignItemsStart  { -webkit-align-items: flex-start ; -moz-align-items: flex-start ; -ms-align-items: flex-start ; align-items: flex-start ; }
+@mixin flexAlignItemsEnd  { -webkit-align-items: flex-end ; -moz-align-items: flex-end ; -ms-align-items: flex-end ; align-items: flex-end ; }
+
+@mixin flexCenter {
+  @include flexRow;
+  @include flexAlignItemsCenter;
+  @include flexJustifyCenter;
+}
+
+@mixin flexRowCenter {
+  @include flexRow;
+  @include flexAlignItemsCenter;
+  @include flexJustifyCenter;
+}
+
+@mixin flexColCenter {
+  @include flexCol;
+  @include flexAlignItemsCenter;
+  @include flexJustifyCenter;
+}
+
+@mixin fullWidth { width  : 100%; max-width: 100%; }
+@mixin fullHeight { height : 100%; }

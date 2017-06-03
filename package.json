@@ -1,0 +1,74 @@
+{
+  "name": "jsrt",
+  "version": "0.0.1",
+  "description": "JavaScript Ray Tracer",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Zorroa/zorroa-js-curator.git"
+  },
+  "scripts": {
+    "post-install": "rm -rf bin; npm run build",
+    "start": "./node_modules/.bin/serve ./bin -p 8080",
+    "dev": "./node_modules/.bin/webpack-dev-server --config ./build/webpack.dev.js --progress --inline --hot --colors --no-info --history-api-fallback",
+    "build-dev": "./node_modules/.bin/webpack --config ./build/webpack.dev.js --progress --colors",
+    "build-only": "./node_modules/.bin/webpack --config ./build/webpack.prod.js --progress --colors",
+    "build-prodlocal": "./node_modules/.bin/webpack --config ./build/webpack.prodlocal.js --progress --colors",
+    "build": "npm test && npm run build-only",
+    "deploy": "sh ./build/build-prod.sh",
+    "pretest": "npm run test:lint",
+    "test": "./node_modules/.bin/jest -i",
+    "test:watch": "./node_modules/.bin/jest --verbose --watch",
+    "test:e2e": "./node_modules/.bin/jest e2e",
+    "test:lint": "./node_modules/.bin/eslint src --color; exit 0",
+    "purge": "rm -rf node_modules; npm cache clean; npm install",
+    "update-fonts": "src/assets/fonts/zorroa-icons/update-fonts.bash",
+    "preview-fonts": "src/assets/fonts/zorroa-icons/preview-fonts.bash"
+  },
+  "author": "Daniel Wexler",
+  "engines": {
+    "node": "6.3.1",
+    "npm": "3.10.7"
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "^.+\\.(css|less|scss)$": "<rootDir>/tests/StyleStub.js",
+      "^.+\\.(jpg|png|jpeg|svg)$": "<rootDir>/tests/MediaStub.js"
+    },
+    "collectCoverage": true
+  },
+  "devDependencies": {
+    "babel-eslint": "7.2.1",
+    "babel-plugin-transform-class-properties": "6.11.5",
+    "babel-plugin-transform-decorators-legacy": "1.3.4",
+    "babel-preset-es2015": "6.14.0",
+    "babel-preset-react": "6.11.1",
+    "babel-preset-stage-1": "6.1.18",
+    "babel-register": "6.14.0",
+    "eslint": "3.18.0",
+    "eslint-config-standard": "6.2.1",
+    "eslint-plugin-react": "6.10.3",
+    "handlebars-webpack-plugin": "0.1.1",
+    "html-webpack-plugin": "2.22.0",
+    "jest-cli": "18.1.0",
+    "saucelabs": "1.3.0",
+    "selenium-webdriver": "3.0.1",
+    "serve": "1.4.0",
+    "webpack": "1.13.2",
+    "webpack-dev-server": "1.16.2"
+  },
+  "dependencies": {
+    "classnames": "2.2.5",
+    "debug": "2.2.0",
+    "depcheck": "0.6.7",
+    "react": "15.4.2",
+    "react-dom": "15.4.2",
+    "react-redux": "4.4.5",
+    "react-router": "2.8.0",
+    "redux": "3.6.0",
+    "redux-multi": "0.1.12",
+    "redux-promise": "0.5.3",
+    "redux-thunk": "2.1.0",
+    "standard": "10.0.2"
+  }
+}

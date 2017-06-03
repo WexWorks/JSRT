@@ -1,0 +1,54 @@
+Here's how to update this font whenever Amber updates the zip file.
+
+At the time of writing, the zip file is found in Google Drive:
+https://drive.google.com/drive/folders/0B2crMLkmt3O9ejJ5SlNjYkNHTTA
+
+Download the zip file, and place it in this directory (zorroa-icons/). If there's a zip file already here, overwrite it.
+
+Make sure you don't have any staged git files, then...
+Run these commands (OSX) from the fonts/zorroa-icons directory:
+
+cd src/assets/fonts/zorroa-icons
+git checkout master
+git checkout -b zorroa-icons
+unzip -o zorroa-icons.zip
+git add -- .
+git commit -m "Update zorroa-icons"
+git push -u origin
+hub pull-request -m "Update zorroa-icons"
+
+Once the pull request is merged, delete the branch
+
+----------------------------------------------------------------------
+
+To preview the fonts and make sure you have the glyphs you expect:
+open demo.html (after unzipping the new zip file)
+
+----------------------------------------------------------------------
+
+Here's the long explanation, for posterity
+
+Unzip the file, allowing it to overwrite whatever's here.
+
+For example:
+
+[src/assets/fonts/zorroa-icons] > unzip zorroa-icons.zip
+Archive:  zorroa-icons.zip
+replace selection.json? [y]es, [n]o, [A]ll, [N]one, [r]ename: A
+ extracting: selection.json
+ extracting: fonts/zorroa-icons.ttf
+ extracting: fonts/zorroa-icons.woff
+ extracting: fonts/zorroa-icons.eot
+ extracting: fonts/zorroa-icons.svg
+ extracting: demo.html
+ extracting: demo-files/demo.js
+ extracting: demo-files/demo.css
+ extracting: Read Me.txt
+ extracting: fonts/zorroa-icons.woff2
+ extracting: style.css
+
+Now commit the changes.
+
+[src/assets/fonts/zorroa-icons] > git add -- .
+
+The .gitignore file should already be ignoring everything that doesn't belong in source control.

@@ -1,0 +1,46 @@
+{
+  "extends": ["plugin:react/recommended", "standard"],
+  "parserOptions": {
+    "ecmaVersion": 7,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "impliedStrict": true,
+      "jsx": true
+    }
+  },
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true
+  },
+  "parser": "babel-eslint",
+  "plugins": [
+    "react"
+  ],
+  "globals": {
+    "jest": true,
+    "describe": true,
+    "jasmine": true,
+    "jasmineRequire": true,
+    "it": true,
+    "fit": true,
+    "xit": true,
+    "expect": true,
+    "beforeEach": true,
+    "afterEach": true,
+    "beforeAll": true,
+    "afterAll": true,
+    "React": true,
+    "DEBUG": true,
+    "PROD": true,
+    "PRODLOCAL": true,
+    "zvBranch": true,
+    "zvCommit": true,
+    "zvCount": true,
+    "zvDateStr": true,
+    "zvDateMs": true,
+    "zvVersion": true,
+    "emailjs": true
+  },
+  "rules": {}
+}
