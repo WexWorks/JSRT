@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 import World from '../World'
 
 const App = (props) => (
@@ -8,7 +9,7 @@ const App = (props) => (
 )
 
 App.propTypes = {
-  children: PropTypes.object
+  children: PropTypes.node
 }
 
 export default App

@@ -51,6 +51,20 @@ export function parseTimecodeMS (timecodeStr) {
   return time
 }
 
+export function randomRGB (min, max) {
+  if (min === undefined) min = 0
+  if (max === undefined) max = 256
+  if (min < 0) min = 0
+  if (max < 0) max = 0
+  if (max > 256) max = 256
+  if (min >= max) max = min
+  return 'rgb(' + Math.floor(random(min, max)) + ',' + Math.floor(random(min, max)) + ',' + Math.floor(random(min, max)) + ')'
+}
+
+export function random(min, max) {
+  return Math.random() * (max - min) + min
+}
+
 export function remap (x, min1, max1, min2, max2) {
   return min2 + (max2 - min2) * ((x - min1) / (max1 - min1))
 }
