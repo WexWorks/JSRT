@@ -2,17 +2,17 @@ import { vec3, mat3 } from 'gl-matrix'
 
 const rotateSamples = true
 
-function traceRay (ray, element, t0) {
+function traceRay (P, D, element) {
   const { min, max, children } = element
-  const d = distance(ray.P, ray.D, min, max)
-  if (d !== Infinity && d >= 0) return true
+  const d = distance(P, D, min, max)
+  if (d !== Infinity && d > 0) return true
   for (let i = 0; i < children.length; ++i) {
-    if (traceRay(ray, children[i])) return true
+    if (traceRay(P, D, children[i])) return true
   }
   return false
 }
 
-function distance (P, D, min, max) {
+export function distance (P, D, min, max) {
   const dims = P.length
   let lo = -Infinity
   let hi = +Infinity
@@ -61,8 +61,7 @@ function traceHemisphere ({P, N}, samples, world, v0, v1, T) {
     // vec3.set(v0, sample[0], sample[1], sample[2])
     // vec3.normalize(v0, v0)
     rotateSamples && vec3.transformMat3(v0, sample, T) || vec3.set(v0, sample[0], sample[1], sample[2])
-    const ray = { P, D: v0 }
-    if (traceRay(ray, world, v1)) hits++
+    if (traceRay(P, v0, world, v1)) hits++
   }
   const Nb = N
   return { hits, P, Nb }

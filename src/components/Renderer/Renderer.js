@@ -1,7 +1,9 @@
 const HemisphereWorker = require('worker-loader!./HemisphereWorker.js')
 
 import { hemisphereSampleCos } from 'hemisphere-sample'
+import { distance } from './HemisphereWorker'
 import { vec3 } from 'gl-matrix'
+import Hemisphere from '../../models/Hemisphere'
 
 export default class Renderer {
   jobId = 0
@@ -30,14 +32,10 @@ export default class Renderer {
     const data = this.image.data
     for (let i = 0; i < lobes.length; ++i) {
       const lobe = lobes[i]
-      const idx = 4 * (lobe.P[1] * this.image.width + lobe.P[0])
-      const r = 64
-      const g = 128
-      const b = 96
-      const a = 255 * lobe.hits / this.raysPerHemi
-      data[idx + 0] = r
-      data[idx + 1] = g
-      data[idx + 2] = b
+      const x = Math.floor(lobe.P[0])
+      const y = Math.floor(lobe.P[1])
+      const idx = 4 * (y * this.image.width + x)
+      const a = 160 * lobe.hits / this.raysPerHemi
       data[idx + 3] = a
     }
   }
@@ -125,10 +123,50 @@ export default class Renderer {
     return { min, max, color, children }
   }
 
-  render (threads, root, hemispheres, width, height, raysPerHemi, progress) {
+  trace (P, D, element) {
+    const { min, max, children } = element
+    const d = distance(P, D, min, max)
+    if (d !== Infinity && d > 0 && d < P[2]) return P[2] - d
+    for (let i = 0; i < children.length; ++i) {
+      const k = this.trace(P, D, children[i])
+      if (k !== Infinity && k > 0 && k < P[2]) return P[2] - k
+    }
+    return 0
+  }
+
+  zIndex = (x, y, world, P, D) => {
+    vec3.set(P, x + 0.5, y + 0.5, 10000)
+    return this.trace(P, D, world)
+  }
+
+  buildHemispheres = (width, height, world) => {
+    const t0 = performance.now()
+    const hemispheres = []
+    hemispheres.length = width * height
+    const v = vec3.create()
+    const N = vec3.create()
+    const D = vec3.create()
+    vec3.set(D, 0, 0, -1)
+    vec3.set(N, 0, 0, 1)
+    let i = 0
+    for (let y = 0; y < height; ++y) {
+      for (let x = 0; x < width; ++x) {
+        const z = this.zIndex(x, y, world, v, D)
+        const P = vec3.create()
+        vec3.set(P, x + 0.5, y + 0.5, z)
+        hemispheres[i++] = new Hemisphere(P, N)
+      }
+    }
+    const sec = (performance.now() - t0) / 1000
+    console.log('Building ' + hemispheres.length + ' hemis took ' + sec.toLocaleString(undefined, {maximumFractionDigits: 2}))
+    return hemispheres
+  }
+
+  render (threads, root, width, height, raysPerHemi, progress) {
     this.progress = progress
     const t0 = performance.now()
     const world = this.aabb(root)
+    const hemispheres = this.buildHemispheres(width, height, world)
     const ms = performance.now() - t0
     const samples = this.hemisphereSamples(raysPerHemi)
     const totalHemis = hemispheres.length.toLocaleString()
