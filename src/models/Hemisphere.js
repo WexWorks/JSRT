@@ -1,7 +1,6 @@
 export default class Hemisphere {
-  constructor (P, N, count) {
+  constructor (P, N) {
     this.P = P
     this.N = N
-    this.count = count
   }
 }

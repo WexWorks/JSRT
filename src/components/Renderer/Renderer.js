@@ -1,14 +1,16 @@
 const HemisphereWorker = require('worker-loader!./HemisphereWorker.js')
 
+import { hemisphereSampleCos } from 'hemisphere-sample'
+import { vec3 } from 'gl-matrix'
+
 export default class Renderer {
   jobId = 0
   workers = []
   hemispheres = []
-  imageData = null
   totalRays = 0
   finishedRays = 0
 
-  createWorkers = (n) => {
+  createWorkers = (n, world, samples) => {
     this.workers.forEach(worker => worker.terminate())
     const workers = []
     for (let i = 0; i < n; ++i) {
@@ -16,17 +18,18 @@ export default class Renderer {
       worker.onmessage = this.jobFinished
       worker.onerror = this.jobError
       worker.id = i
+      const job = { world, samples }
+      worker.postMessage(job)
       workers.push(worker)
     }
     this.workers = workers
   }
 
-  renderHemispheres = (hemis, lobes) => {
+  renderHemispheres = (lobes) => {
     const data = this.image.data
-    for (let i = 0; i < hemis.length; ++i) {
-      const hemi = hemis[i]
+    for (let i = 0; i < lobes.length; ++i) {
       const lobe = lobes[i]
-      const idx = 4 * (hemi.P.y * this.image.width + hemi.P.x)
+      const idx = 4 * (lobe.P[1] * this.image.width + lobe.P[0])
       const r = 64
       const g = 128
       const b = 96
@@ -65,9 +68,9 @@ export default class Renderer {
   jobFinished = (msg) => {
     const job = msg.data
     if (job.jobId !== this.jobId) return
-    const { hemis, lobes, workerId } = job
-    this.renderHemispheres(hemis, lobes)
-    this.finishedRays += hemis.length * hemis[0].count
+    const { lobes, workerId } = job
+    this.renderHemispheres(lobes)
+    this.finishedRays += lobes.length * this.raysPerHemi
     const worker = this.workers[workerId]
     this.nextJob(worker)
     if (!this.hemispheres.length) {
@@ -91,13 +94,44 @@ export default class Renderer {
     }
   }
 
-  render (threads, hemispheres, width, height, progress) {
+  jobError = (msg) => {
+    console.log('Error: ' + msg)
+  }
+
+  hemisphereSamples (count) {
+    const samples = []
+    for (let i = 0; i < count; ++i) {
+      const N = hemisphereSampleCos(i, count)
+      samples.push(N)
+    }
+    return samples
+  }
+
+  aabb = (element) => {
+    const children = []
+    for (let i = 0; i < element.children.length; ++i) {
+      const child = element.children.item(i)
+      children.push(this.aabb(child))
+    }
+    const rect = element.getBoundingClientRect()
+    const min = vec3.create()
+    const max = vec3.create()
+    vec3.set(min, rect.left, rect.top, 0)
+    vec3.set(max, rect.right, rect.bottom, element.style.zIndex)
+    const color = element.style.backgroundColor
+    return { min, max, color, children }
+  }
+
+  render (threads, root, hemispheres, width, height, raysPerHemi, progress) {
     this.progress = progress
     this.startTime = performance.now()
+    const world = this.aabb(root)
+    const samples = this.hemisphereSamples(raysPerHemi)
     const totalHemis = hemispheres.length.toLocaleString()
     console.log('Render ' + totalHemis + ' hemis with ' + threads + ' workers')
-    this.createWorkers(threads)
-    this.totalRays = hemispheres.length * hemispheres[0].count
+    this.createWorkers(threads, world, samples)
+    this.raysPerHemi = raysPerHemi
+    this.totalRays = hemispheres.length * raysPerHemi
     this.hemispheres = hemispheres
     this.image = new ImageData(width, height)
     this.workers.forEach(worker => this.nextJob(worker))
