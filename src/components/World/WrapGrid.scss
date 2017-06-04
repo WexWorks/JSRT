@@ -1,0 +1,8 @@
+@import '../../styles/core-mixins.scss';
+
+.WrapGrid {
+  @include flexRow;
+  @include flexWrap;
+  width: 100%;
+  height: 100%;
+}

@@ -4,29 +4,10 @@ import { connect } from 'react-redux'
 import { vec3 } from 'gl-matrix'
 
 import Renderer from '../Renderer'
+import WrapGrid from './WrapGrid'
 import Hemisphere from '../../models/Hemisphere'
-import { random, randomRGB, grayscaleRGB } from '../../services/jsUtil'
 
 export class World extends Component {
-
-  componentWillMount () {
-    this.dim = 1000
-    const N = 100
-    const cells = []
-    cells.length = N
-    const minDim = this.dim / 16
-    const maxDim = 2 * minDim
-    for (let i = 0; i < N; ++i) {
-      const z = random(minDim, maxDim)
-      cells[i] = {
-        width: Math.floor(random(minDim, maxDim)),
-        height: Math.floor(0.5 * (minDim + maxDim)),
-        zIndex: Math.floor(z),
-        backgroundColor: randomRGB(192, 230)
-      }
-    }
-    this.cells = cells
-  }
 
   componentDidMount () {
     this.startRender()
@@ -81,13 +62,15 @@ export class World extends Component {
   }
 
   render () {
-    const style = {width: this.dim, height: this.dim}
+    const width = 500
+    const height = 500
+    const style = {width, height}
     return (
       <div className="World" style={style}>
         <div className="World-scene" ref="World">
-          { this.cells.map((cell, i) => <div key={i} className="World-cell" style={cell}/>) }
+          <WrapGrid width={width} height={height} count={100}/>
         </div>
-        <canvas className="World-canvas" ref="canvas" width={this.dim} height={this.dim}/>
+        <canvas className="World-canvas" ref="canvas" width={width} height={height}/>
       </div>
     )
   }
