@@ -61,6 +61,10 @@ export function randomRGB (min, max) {
   return 'rgb(' + Math.floor(random(min, max)) + ',' + Math.floor(random(min, max)) + ',' + Math.floor(random(min, max)) + ')'
 }
 
+export function grayscaleRGB (gray) {
+  return 'rgb(' + gray + ',' + gray + ',' + gray + ')'
+}
+
 export function random(min, max) {
   return Math.random() * (max - min) + min
 }

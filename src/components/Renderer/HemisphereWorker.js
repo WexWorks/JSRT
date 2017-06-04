@@ -1,27 +1,51 @@
-import intersection from 'ray-aabb-intersection'
 import { vec3, mat3 } from 'gl-matrix'
+
+const rotateSamples = true
 
 function traceRay (ray, element, t0) {
   const { min, max, children } = element
-  const aabb = [min, max]
-  if (intersection(t0, ray.P, ray.D, aabb)) {
-    return true
-  }
+  const d = distance(ray.P, ray.D, min, max)
+  if (d !== Infinity && d >= 0) return true
   for (let i = 0; i < children.length; ++i) {
-    if (traceRay(ray, children[i])) {
-      return true
-    }
+    if (traceRay(ray, children[i])) return true
   }
   return false
 }
 
+function distance (P, D, min, max) {
+  const dims = P.length
+  let lo = -Infinity
+  let hi = +Infinity
+
+  for (let i = 0; i < dims; i++) {
+    let dimLo = (min[i] - P[i]) / D[i]
+    let dimHi = (max[i] - P[i]) / D[i]
+
+    if (dimLo > dimHi) {
+      const tmp = dimLo
+      dimLo = dimHi
+      dimHi = tmp
+    }
+
+    if (dimHi < lo || dimLo > hi) {
+      return Infinity
+    }
+
+    if (dimLo > lo) lo = dimLo
+    if (dimHi < hi) hi = dimHi
+  }
+
+  return lo > hi ? Infinity : lo
+}
+
+// T set to matrix with Z=N for rotating vectors
 function buildOrthonormal (T, N, X, Y) {
-  vec3.set(X, 1, 0, 0)
-  vec3.cross(X, X, N)
+  vec3.set(X, Math.random(), Math.random(), Math.random())
   vec3.normalize(X, X)
-  vec3.set(Y, 0, 1, 0)
-  vec3.cross(Y, Y, N)
-  vec3.normalize(Y, Y)
+  vec3.cross(X, X, N)
+  vec3.cross(X, N, X)
+  vec3.normalize(X, X)
+  vec3.cross(Y, X, N)
   mat3.set(T,
     X[0], X[1], X[2],
     Y[0], Y[1], Y[2],
@@ -29,17 +53,19 @@ function buildOrthonormal (T, N, X, Y) {
   )
 }
 
-function traceHemisphere ({ P, N, count }, samples, world, v0, v1, T) {
+function traceHemisphere ({P, N}, samples, world, v0, v1, T) {
   let hits = 0
-  buildOrthonormal(T, N, v0, v1)
+  if (rotateSamples) buildOrthonormal(T, N, v0, v1)
   for (let i = 0; i < samples.length; ++i) {
     const sample = samples[i]
-    vec3.transformMat3(v0, sample, T)
+    // vec3.set(v0, sample[0], sample[1], sample[2])
+    // vec3.normalize(v0, v0)
+    rotateSamples && vec3.transformMat3(v0, sample, T) || vec3.set(v0, sample[0], sample[1], sample[2])
     const ray = { P, D: v0 }
     if (traceRay(ray, world, v1)) hits++
   }
   const Nb = N
-  return { P, count, hits, Nb }
+  return { hits, P, Nb }
 }
 
 onmessage = function (msg) {
@@ -50,7 +76,12 @@ onmessage = function (msg) {
     const v0 = vec3.create()
     const v1 = vec3.create()
     const T = mat3.create()
-    const lobes = job.hemis.map(hemi => traceHemisphere(hemi, this.samples, this.world, v0, v1, T))
+    const lobes = []
+    lobes.length = job.hemis.length
+    for (let i = 0; i < job.hemis.length; ++i) {
+      const hemi = job.hemis[i]
+      lobes[i] = traceHemisphere(hemi, this.samples, this.world, v0, v1, T)
+    }
     const { workerId, jobId } = job
     postMessage({ workerId, jobId, lobes })
   }

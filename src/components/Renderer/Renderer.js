@@ -9,6 +9,7 @@ export default class Renderer {
   hemispheres = []
   totalRays = 0
   finishedRays = 0
+  elementCount = 0
 
   createWorkers = (n, world, samples) => {
     this.workers.forEach(worker => worker.terminate())
@@ -33,7 +34,7 @@ export default class Renderer {
       const r = 64
       const g = 128
       const b = 96
-      const a = 255 * lobe.hits / lobe.count
+      const a = 255 * lobe.hits / this.raysPerHemi
       data[idx + 0] = r
       data[idx + 1] = g
       data[idx + 2] = b
@@ -48,8 +49,8 @@ export default class Renderer {
       return
     }
     worker.done = false
-    const reportInterval = 100000
-    const k = Math.floor(n / reportInterval)
+    const reportInterval = 250000
+    const k = Math.round(n / reportInterval)
     const maxHemis = 1024
     const dim = Math.min(maxHemis, n)
     const hemis = this.hemispheres.splice(n - dim, dim)
@@ -57,9 +58,9 @@ export default class Renderer {
     const workerId = worker.id
     const job = { hemis, jobId, workerId }
     worker.postMessage(job)
-    if (k !== Math.floor(this.hemispheres.length / reportInterval)) {
+    if (k !== Math.round(this.hemispheres.length / reportInterval)) {
       const pct = this.finishedRays / this.totalRays
-      const msg = this.hemispheres.length + ' hemispheres left'
+      const msg = this.hemispheres.length + ' hemispheres remaining'
       this.progress(pct, msg, this.image)
       console.log()
     }
@@ -109,10 +110,12 @@ export default class Renderer {
 
   aabb = (element) => {
     const children = []
+    children.length = element.children.length
     for (let i = 0; i < element.children.length; ++i) {
       const child = element.children.item(i)
-      children.push(this.aabb(child))
+      children[i] = this.aabb(child)
     }
+    this.elementCount += children.length
     const rect = element.getBoundingClientRect()
     const min = vec3.create()
     const max = vec3.create()
@@ -124,16 +127,18 @@ export default class Renderer {
 
   render (threads, root, hemispheres, width, height, raysPerHemi, progress) {
     this.progress = progress
-    this.startTime = performance.now()
+    const t0 = performance.now()
     const world = this.aabb(root)
+    const ms = performance.now() - t0
     const samples = this.hemisphereSamples(raysPerHemi)
     const totalHemis = hemispheres.length.toLocaleString()
-    console.log('Render ' + totalHemis + ' hemis with ' + threads + ' workers')
+    console.log('Render ' + totalHemis + ' hemis with ' + threads + ' workers, aabb took ' + ms.toLocaleString() + ' ms, with ' + this.elementCount + ' elements')
     this.createWorkers(threads, world, samples)
     this.raysPerHemi = raysPerHemi
     this.totalRays = hemispheres.length * raysPerHemi
     this.hemispheres = hemispheres
     this.image = new ImageData(width, height)
+    this.startTime = performance.now()
     this.workers.forEach(worker => this.nextJob(worker))
   }
 }
