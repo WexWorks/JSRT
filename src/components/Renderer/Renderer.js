@@ -86,7 +86,8 @@ export default class Renderer {
         const sec = (t1 - this.startTime) / 1000
         const rps = this.totalRays / sec
         const rpss = rps.toLocaleString(undefined, {maximumFractionDigits: 2})
-        const msg = 'Render took ' + sec + ' seconds, ' + rpss + ' rays/sec'
+        const secs = sec.toLocaleString(undefined, {maximumFractionDigits: 2})
+        const msg = 'Render took ' + secs + ' seconds, ' + rpss + ' rays/sec'
         this.progress(1, msg, this.image)
         console.log()
       }
@@ -123,20 +124,26 @@ export default class Renderer {
     return { min, max, color, children }
   }
 
-  trace (P, D, element) {
+  trace (P, D, element, minD) {
     const { min, max, children } = element
     const d = distance(P, D, min, max)
-    if (d !== Infinity && d > 0 && d < P[2]) return P[2] - d
-    for (let i = 0; i < children.length; ++i) {
-      const k = this.trace(P, D, children[i])
-      if (k !== Infinity && k > 0 && k < P[2]) return P[2] - k
+    if (d !== Infinity && d > 0 && d < P[2]) {
+      minD = Math.min(d, minD)
     }
-    return 0
+    for (let i = 0; i < children.length; ++i) {
+      const k = this.trace(P, D, children[i], minD)
+      if (k !== Infinity && k > 0 && k < P[2]) {
+        minD = Math.min(k, minD)
+      }
+    }
+    return minD
   }
 
   zIndex = (x, y, world, P, D) => {
-    vec3.set(P, x + 0.5, y + 0.5, 10000)
-    return this.trace(P, D, world)
+    const maxZ = 10000
+    vec3.set(P, x + 0.5, y + 0.5, maxZ)
+    const d = this.trace(P, D, world, Infinity)
+    return d === Infinity ? 0 : maxZ - d
   }
 
   buildHemispheres = (width, height, world) => {
@@ -158,7 +165,8 @@ export default class Renderer {
       }
     }
     const sec = (performance.now() - t0) / 1000
-    console.log('Building ' + hemispheres.length + ' hemis took ' + sec.toLocaleString(undefined, {maximumFractionDigits: 2}))
+    const secs = sec.toLocaleString(undefined, {maximumFractionDigits: 2})
+    console.log('Building ' + hemispheres.length + ' hemis took ' + secs + ' seconds')
     return hemispheres
   }
 
@@ -167,10 +175,10 @@ export default class Renderer {
     const t0 = performance.now()
     const world = this.aabb(root)
     const hemispheres = this.buildHemispheres(width, height, world)
-    const ms = performance.now() - t0
+    const sec = (performance.now() - t0) / 1000
     const samples = this.hemisphereSamples(raysPerHemi)
     const totalHemis = hemispheres.length.toLocaleString()
-    console.log('Render ' + totalHemis + ' hemis with ' + threads + ' workers, aabb took ' + ms.toLocaleString() + ' ms, with ' + this.elementCount + ' elements')
+    console.log('Render ' + totalHemis + ' hemis with ' + threads + ' workers, aabb took ' + sec.toLocaleString(undefined, {maximumFractionDigits: 2}) + ' seconds, with ' + this.elementCount + ' elements')
     this.createWorkers(threads, world, samples)
     this.raysPerHemi = raysPerHemi
     this.totalRays = hemispheres.length * raysPerHemi

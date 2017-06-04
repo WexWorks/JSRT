@@ -8,11 +8,8 @@
 .World-scene {
   width: 100%;
   height: 100%;
-}
-
-.World-cell {
-  width: 30px;
-  height: 30px;
+  position: relative;
+  overflow: hidden;
 }
 
 .World-canvas {

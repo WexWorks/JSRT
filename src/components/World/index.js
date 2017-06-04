@@ -1,4 +1,4 @@
 import World from './World'
 import './World.scss'
-import './WrapGrid.scss'
+import './Boxes.scss'
 export default World

@@ -3,7 +3,7 @@ import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 
 import Renderer from '../Renderer'
-import WrapGrid from './WrapGrid'
+import Boxes from './Boxes'
 
 export class World extends Component {
 
@@ -39,7 +39,7 @@ export class World extends Component {
     return (
       <div className="World" style={style}>
         <div className="World-scene" ref="World">
-          <WrapGrid width={width} height={height} count={20}/>
+          <Boxes width={width} height={height} count={100}/>
         </div>
         <canvas className="World-canvas" ref="canvas" width={width} height={height}/>
       </div>
