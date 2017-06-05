@@ -81,7 +81,6 @@ export default class Renderer {
         }
       }
       if (finished) {
-        this.startTime = null
         const t1 = performance.now()
         const sec = (t1 - this.startTime) / 1000
         const rps = this.totalRays / sec
@@ -126,15 +125,11 @@ export default class Renderer {
 
   trace (P, D, element, minD) {
     const { min, max, children } = element
-    const d = distance(P, D, min, max)
-    if (d !== Infinity && d > 0 && d < P[2]) {
-      minD = Math.min(d, minD)
-    }
+    let d = distance(P, D, min, max)
+    if (d !== Infinity && d > 0 && d < P[2]) minD = Math.min(d, minD)
     for (let i = 0; i < children.length; ++i) {
-      const k = this.trace(P, D, children[i], minD)
-      if (k !== Infinity && k > 0 && k < P[2]) {
-        minD = Math.min(k, minD)
-      }
+      d = this.trace(P, D, children[i], minD)
+      if (d !== Infinity && d > 0 && d < P[2]) minD = Math.min(d, minD)
     }
     return minD
   }
@@ -171,6 +166,7 @@ export default class Renderer {
   }
 
   render (threads, root, width, height, raysPerHemi, progress) {
+    this.jobId++
     this.progress = progress
     const t0 = performance.now()
     const world = this.aabb(root)

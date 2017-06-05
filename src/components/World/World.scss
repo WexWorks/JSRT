@@ -1,14 +1,12 @@
 @import '../../styles/core-mixins.scss';
 
 .World {
-  position: relative;
   @include flexRow;
 }
 
 .World-scene {
   width: 100%;
   height: 100%;
-  position: relative;
   overflow: hidden;
 }
 
@@ -16,6 +14,29 @@
   position: absolute;
   left: 0;
   right: 0;
-  width: 100%;
-  height: 100%;
+}
+
+.World-controls {
+  @include flexCol;
+  margin-left: 10px;
+}
+
+.World-button {
+  @include flexRowCenter;
+  width: 120px;
+  border-radius: 3px;
+  padding: 4px 10px;
+  background-color: $zorroa-water-blue;
+  color: white;
+  margin-bottom: 10px;
+  &:hover { background-color: cornflowerblue; }
+}
+
+.World-number {
+  margin-bottom: 10px;
+  @include flexRow;
+  @include flexAlignItemsCenter;
+}
+
+.World-message {
 }

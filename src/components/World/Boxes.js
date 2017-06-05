@@ -7,11 +7,26 @@ export default class Boxes extends Component {
   static propTypes = {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    count: PropTypes.number.isRequired
+    count: PropTypes.number.isRequired,
+    frame: PropTypes.number.isRequired
   }
 
+  cells = []
+  frame = -1
+
   componentWillMount () {
-    this.cells = this.buildScatterCells()
+    this.updateCells(this.props)
+  }
+
+  componentWillReceiveProps (nextProps) {
+    this.updateCells(nextProps)
+  }
+
+  updateCells (props) {
+    if (props.frame != this.frame) {
+      this.cells = this.buildScatterCells()
+      this.frame = props.frame
+    }
   }
 
   buildWrapCells () {
